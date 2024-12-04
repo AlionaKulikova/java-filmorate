@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class MainExceptionHandler {
     @ExceptionHandler(ConditionsNotMetException.class)
     public ResponseEntity<?> entityNotFound(final ConditionsNotMetException e) {
-        return new ResponseEntity<>(HttpStatus.valueOf(400));
+        return new ResponseEntity<>(new ErrorResponse(String.valueOf(e.getClass()), e.getMessage()), HttpStatus.valueOf(400));
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<?> validationException(final NotFoundException e) {
-        return new ResponseEntity<>(HttpStatus.valueOf(404));
+        return new ResponseEntity<>(new ErrorResponse(String.valueOf(e.getClass()), e.getMessage()), HttpStatus.valueOf(404));
     }
 }
