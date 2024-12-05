@@ -3,6 +3,12 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmService.FilmServiceManager;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
@@ -18,7 +24,11 @@ public class FilmControllerTest {
                 .duration(88888)
                 .build();
 
-        Film saveFilm = FilmController.create(film);
+        FilmStorage filmStorage = new InMemoryFilmStorage();
+        UserStorage userStorage = new InMemoryUserStorage();
+        FilmService filmService = new FilmServiceManager(filmStorage, userStorage);
+        FilmController filmController = new FilmController(filmService);
+        Film saveFilm = filmController.create(film);
 
         assertEquals(film, saveFilm);
     }
@@ -32,13 +42,18 @@ public class FilmControllerTest {
                 .duration(88888)
                 .build();
 
-        final Film saveFilm = FilmController.create(film);
+        FilmStorage filmStorage = new InMemoryFilmStorage();
+        UserStorage userStorage = new InMemoryUserStorage();
+        FilmService filmService = new FilmServiceManager(filmStorage, userStorage);
+        FilmController filmController = new FilmController(filmService);
+        Film saveFilm = filmController.create(film);
+
         saveFilm.setDescription("DescriptionTestThree");
         saveFilm.setDuration(55);
         saveFilm.setName("NameTestThree");
         saveFilm.getReleaseDate();
 
-        final Film updateFilm = FilmController.create(saveFilm);
+        Film updateFilm = filmController.create(saveFilm);
 
         assertEquals(saveFilm, updateFilm);
     }
