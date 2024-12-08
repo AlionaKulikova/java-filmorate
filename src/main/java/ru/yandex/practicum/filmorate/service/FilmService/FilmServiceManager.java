@@ -104,6 +104,14 @@ public class FilmServiceManager implements FilmService {
             log.error("Ошибка валидации: Длительность фильма не может быть отрицательной");
             throw new ConditionsNotMetException("Длительность фильма не может быть отрицательной");
         }
+       /* if (film.getGenres().size()<0) {
+            log.error("Ошибка валидации: Жанр не может быть пустым");
+            throw new ConditionsNotMetException("Жанр не может быть пустым");
+        }
+        if (film.getMpa() == null) {
+            log.error("Ошибка валидации: MPA не может быть пустым");
+            throw new ConditionsNotMetException("MPA не может быть пустым");
+        }*/
     }
 
     private long getNextId() {
