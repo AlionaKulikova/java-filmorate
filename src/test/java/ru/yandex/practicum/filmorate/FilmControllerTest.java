@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate;
+/*package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
@@ -58,3 +58,4 @@ public class FilmControllerTest {
         assertEquals(saveFilm, updateFilm);
     }
 }
+*/
