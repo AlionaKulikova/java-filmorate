@@ -14,7 +14,7 @@ import java.util.Set;
 @Component
 public class UserRowMapper implements RowMapper<User> {
     protected final JdbcTemplate jdbc;
-    String FIND_ALL_FRIENDS_BY_ID_QUERY = "SELECT friendid FROM friends WHERE userid = ?";
+    private static final String FIND_ALL_FRIENDS_BY_ID_QUERY = "SELECT friendid FROM friends WHERE userid = ?";
 
     public UserRowMapper(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
