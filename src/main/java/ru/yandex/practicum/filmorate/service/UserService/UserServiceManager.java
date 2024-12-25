@@ -2,17 +2,18 @@ package ru.yandex.practicum.filmorate.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,36 +22,42 @@ public class UserServiceManager implements UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserServiceManager(FilmStorage filmStorage, UserStorage userStorage) {
+    public UserServiceManager(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                              @Qualifier("UserDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
 
     @Override
-    public Collection<User> findAllUsers() {
-        return userStorage.getAllUsers();
+    public List<UserDto> findAllUsers() {
+        log.info("Получение всех пользователей.");
+        return userStorage.getAllUsers()
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User findUserByID(Long userId) {
-        return userStorage.getUserById(userId);
+    public UserDto findUserByID(Long userId) {
+        log.info("Получение пользователя по id = {} ", userId);
+        return UserMapper.mapToUserDto(userStorage.getUserById(userId));
     }
 
     @Override
-    public User createUser(User user) {
+    public UserDto createUser(User user) {
         log.info("Создание пользователя: {}", user);
         validateUser(user);
         user.setId(getNextId());
 
-        return userStorage.saveUser(user);
+        return UserMapper.mapToUserDto(userStorage.saveUser(user));
     }
 
     @Override
-    public User updateUser(User newUser) {
+    public UserDto updateUser(User newUser) {
         log.info("Обновление пользователя с ID: {}", newUser.getId());
         if (newUser.getId() == null) {
-            log.error("Ошибка при обновлении: Id должен быть указан");
-            throw new ConditionsNotMetException("Id должен быть указан");
+            log.error("Ошибка при обновлении пользователя. Id не указан");
+            throw new ConditionsNotMetException("Id пользователя должен быть указан");
         }
         User oldUser = userStorage.updateUser(newUser);
         validateUser(newUser);
@@ -60,49 +67,45 @@ public class UserServiceManager implements UserService {
         oldUser.setBirthday(newUser.getBirthday());
         log.info("Пользователь с ID: {} успешно обновлен", newUser.getId());
 
-        return oldUser;
+        return UserMapper.mapToUserDto(oldUser);
     }
 
     @Override
     public void addFriend(Long userId, Long friendId) {
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+        userStorage.userAddFriend(userId, friendId);
         log.info("Пользователю с id " + userId + " добавлен друг с id" + friendId);
     }
 
     @Override
     public void deleteFriendById(Long idUser, Long idFriend) {
-        User user = userStorage.getUserById(idUser);
-        User friend = userStorage.getUserById(idFriend);
-        user.getFriends().remove(idFriend);
-        friend.getFriends().remove(idUser);
+        userStorage.userDeleteFriend(idUser, idFriend);
         log.info("Пользователь с id " + idUser + " и пользователь с id " + idFriend + " больше не друзья.");
     }
 
     @Override
-    public Collection<User> readAllFriendsByUserId(Long idUser) {
+    public Collection<UserDto> readAllFriendsByUserId(Long idUser) {
         User user = userStorage.getUserById(idUser);
         Set<Long> idFriendsOfUser = user.getFriends();
-        Collection<User> friendsOfUser = new ArrayList<>();
+        Collection<UserDto> friendsOfUser = new ArrayList<>();
         for (Long id : idFriendsOfUser) {
-            friendsOfUser.add(userStorage.getUserById(id));
+            friendsOfUser.add(UserMapper.mapToUserDto(userStorage.getUserById(id)));
         }
-        log.info("Возвраён список друзей пользователя с id " + idUser);
+        friendsOfUser.forEach(friend -> log.info(friend.toString()));
+        log.info("Возврщаем список друзей пользователя с id " + idUser);
+
         return friendsOfUser;
     }
 
     @Override
-    public Collection<User> readAllCommonFriends(Long idUser1, Long idUser2) {
-        Set<Long> idFriendsOfUsers = new HashSet<>(userStorage.getUserById(idUser1).getFriends());//получаем друзей 1-го//сразу в hashset
-        idFriendsOfUsers.retainAll(userStorage.getUserById(idUser2).getFriends());//получаем друзей 2-го//b  тоже в hashset
-
-        Collection<User> friendsOfUsers = new ArrayList<>();
+    public Collection<UserDto> readAllCommonFriends(Long idUser1, Long idUser2) {
+        Set<Long> idFriendsOfUsers = new HashSet<>(userStorage.getUserById(idUser1).getFriends());
+        idFriendsOfUsers.retainAll(userStorage.getUserById(idUser2).getFriends());
+        Collection<UserDto> friendsOfUsers = new ArrayList<>();
         for (Long id : idFriendsOfUsers) {
-            friendsOfUsers.add(userStorage.getUserById(id));
+            friendsOfUsers.add(UserMapper.mapToUserDto(userStorage.getUserById(id)));
         }
-        log.info("Возвращён список общих друзей пользователя с id " + idUser1 + " и пользователя с id" + idUser2);
+        log.info("Возвращаем список общих друзей пользователя с id " + idUser1 + " и пользователя с id" + idUser2);
+
         return friendsOfUsers;
     }
 
@@ -124,11 +127,12 @@ public class UserServiceManager implements UserService {
         }
     }
 
-    private long getNextId() {
-        long currentMaxId = userStorage.getAllUsers().stream()
+    private Long getNextId() {
+        Long currentMaxId = (long) Math.toIntExact(userStorage.getAllUsers().stream()
                 .mapToLong(User::getId)
                 .max()
-                .orElse(0);
+                .orElse(0));
+
         return ++currentMaxId;
     }
 }

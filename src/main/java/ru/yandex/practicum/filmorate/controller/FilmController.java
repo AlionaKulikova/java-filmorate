@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService.FilmService;
 
@@ -12,7 +13,6 @@ import java.util.Collection;
 
 @Slf4j
 @RestController
-
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
@@ -23,22 +23,22 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> findAllFilms() {
+    public Collection<FilmDto> findAllFilms() {
         return filmService.findAllFilms();
     }
 
     @GetMapping("{filmId}")
-    public Film findFilmById(@PathVariable Long filmId) {
+    public FilmDto findFilmById(@PathVariable Long filmId) {
         return filmService.findFilmById(filmId);
     }
 
     @PostMapping
-    public Film create(@RequestBody Film film) {
+    public FilmDto create(@RequestBody Film film) {
         return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film update(@RequestBody Film newFilm) {
+    public FilmDto update(@RequestBody Film newFilm) {
         return filmService.updateFilm(newFilm);
     }
 
@@ -55,7 +55,7 @@ public class FilmController {
     }
 
     @GetMapping("popular")
-    public Collection<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") Long count) {
+    public Collection<FilmDto> getPopularFilms(@RequestParam(required = false, defaultValue = "10") Long count) {
         return filmService.getPopularFilms(count);
     }
 }

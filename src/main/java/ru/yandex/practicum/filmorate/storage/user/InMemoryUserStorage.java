@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.user;
+/*package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -48,4 +48,4 @@ public class InMemoryUserStorage implements UserStorage {
         log.error("Ошибка при обновлении: Пользователь с id = {} не найден", newUser.getId());
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
     }
-}
+}*/
