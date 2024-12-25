@@ -35,7 +35,7 @@ public class FilmDbStorage implements FilmStorage {
     private static final String DELETE_INTO_FILM_GENRES_QUERY_BY_FILM_ID = "DELETE FROM filmgenres WHERE filmid = ?";
     private static final String UPDATE_BY_FILM_ID_AND_GENRE_ID_QUERY = "INSERT INTO filmgenres (filmid, genreid) " +
             "VALUES (?,?)";
-    String FIND_TOP_FILMS_QUERY = "SELECT id, name, description, releaseDate, duration, mpaid" +
+    private static final String FIND_TOP_FILMS_QUERY = "SELECT id, name, description, releaseDate, duration, mpaid" +
             " FROM films" +
             " LEFT JOIN likes ON id = filmid " +
             "GROUP BY id ORDER BY count(userid) desc  " +
