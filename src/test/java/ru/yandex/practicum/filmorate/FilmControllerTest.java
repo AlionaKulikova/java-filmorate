@@ -31,7 +31,6 @@ public class FilmControllerTest {
                 .duration(88888)
                 .build();
 
-
         FilmDto saveFilm = filmController.create(film);
 
         assertEquals(FilmMapper.mapToFilmDto(film), saveFilm);
