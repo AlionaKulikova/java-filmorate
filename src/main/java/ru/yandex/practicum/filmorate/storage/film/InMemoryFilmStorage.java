@@ -48,4 +48,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.error("Ошибка при обновлении: Фильм с id = {} не найден ", newFilm.getId());
         throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
     }
+
+    @Override
+    public Set<Film> getTopFilms(Long count) {
+        return null;
+    }
 }

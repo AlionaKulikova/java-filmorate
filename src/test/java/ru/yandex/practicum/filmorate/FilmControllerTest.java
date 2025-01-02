@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService.FilmService;
 import ru.yandex.practicum.filmorate.service.FilmService.FilmServiceManager;
@@ -13,10 +15,15 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class FilmControllerTest {
     @Test
     void shouldSave() {
+        FilmStorage filmStorage = new InMemoryFilmStorage();
+        UserStorage userStorage = new InMemoryUserStorage();
+        FilmService filmService = new FilmServiceManager(filmStorage, userStorage, null);
+        FilmController filmController = new FilmController(filmService);
         Film film = Film.builder()
                 .name("NameTestOne")
                 .description("DescriptionTestOne")
@@ -24,37 +31,35 @@ public class FilmControllerTest {
                 .duration(88888)
                 .build();
 
-        FilmStorage filmStorage = new InMemoryFilmStorage();
-        UserStorage userStorage = new InMemoryUserStorage();
-        FilmService filmService = new FilmServiceManager(filmStorage, userStorage);
-        FilmController filmController = new FilmController(filmService);
-        Film saveFilm = filmController.create(film);
+        FilmDto saveFilm = filmController.create(film);
 
-        assertEquals(film, saveFilm);
+        assertEquals(FilmMapper.mapToFilmDto(film), saveFilm);
     }
 
     @Test
     void shouldUpdate() {
+        FilmStorage filmStorage = new InMemoryFilmStorage();
+        UserStorage userStorage = new InMemoryUserStorage();
+        FilmService filmService = new FilmServiceManager(filmStorage, userStorage, null);
+        FilmController filmController = new FilmController(filmService);
         Film film = Film.builder()
                 .name("NameTestTwo")
                 .description("DescriptionTestTwo")
                 .releaseDate(LocalDate.of(2007, 5, 7))
                 .duration(88888)
                 .build();
+        Film filmNew = Film.builder()
+                .name("NameTestTwoNew")
+                .description("DescriptionTestTwoNew")
+                .releaseDate(LocalDate.of(2008, 6, 8))
+                .duration(88888)
+                .build();
 
-        FilmStorage filmStorage = new InMemoryFilmStorage();
-        UserStorage userStorage = new InMemoryUserStorage();
-        FilmService filmService = new FilmServiceManager(filmStorage, userStorage);
-        FilmController filmController = new FilmController(filmService);
-        Film saveFilm = filmController.create(film);
+        FilmDto saveFilm = filmController.create(film);
+        Long idFilm = saveFilm.getId();
+        filmNew.setId(idFilm);
+        FilmDto updateFilm = filmController.create(filmNew);
 
-        saveFilm.setDescription("DescriptionTestThree");
-        saveFilm.setDuration(55);
-        saveFilm.setName("NameTestThree");
-        saveFilm.getReleaseDate();
-
-        Film updateFilm = filmController.create(saveFilm);
-
-        assertEquals(saveFilm, updateFilm);
+        assertNotEquals(saveFilm, updateFilm);
     }
 }
