@@ -69,7 +69,7 @@ Template repository for Filmorate project.
 Клонируйте репозиторий:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/AlionaKulikova/java-filmorate.git
 cd filmorate
 
 
